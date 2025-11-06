@@ -2,14 +2,12 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8" />
-  
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-  
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Kart Problemen Dashboard v1.1</title>
-<link rel="manifest" href="manifest.json?v=20251106-3">
+<title>Kart Problemen Dashboard v1.2</title>
+<link rel="manifest" href="manifest.json?v=20251106-4">
 <meta name="theme-color" content="#00c896">
 
 <style>
@@ -35,7 +33,7 @@ header {
   background:var(--card); padding:15px 25px;
   box-shadow:0 2px 10px var(--shadow); position:sticky; top:0; z-index:100;
 }
-h1 {font-size:1.4rem;}
+h1 {font-size:1.6rem; margin:0}
 #modeToggle {
   background:var(--accent); border:none; border-radius:50%;
   width:38px; height:38px; color:#fff; font-size:18px; cursor:pointer;
@@ -52,155 +50,96 @@ main {max-width:1100px; margin:auto; padding:20px;}
 /* Stats */
 .stats {
   display:flex; flex-wrap:wrap; justify-content:space-around;
-  gap:10px; margin-bottom:25px;
+  gap:10px; margin-bottom:20px;
 }
 .stat {
-  flex:1; min-width:180px; text-align:center;
+  flex:1; min-width:160px; text-align:center;
   background:var(--card); border:1px solid var(--border);
   border-radius:10px; box-shadow:0 2px 10px var(--shadow);
-  padding:15px;
+  padding:12px;
 }
-.stat h2 {margin:0; font-size:2rem;}
-.stat p {margin:5px 0 0; color:#aaa;}
+.stat h2 {margin:0; font-size:1.6rem;}
+.stat p {margin:5px 0 0; color:#aaa; font-size:0.9rem}
 
 /* Forms */
 form,.filters {
   background:var(--card); border:1px solid var(--border);
-  border-radius:10px; padding:15px; margin-bottom:20px;
+  border-radius:10px; padding:12px; margin-bottom:16px;
   box-shadow:0 2px 10px var(--shadow);
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
 }
 input,select,button {
-  padding:8px; margin:5px; border-radius:5px;
+  padding:8px; margin:2px; border-radius:6px;
   border:1px solid var(--border); background:#222; color:var(--fg);
 }
 body.light input,body.light select,body.light button{background:#fff;color:#000;}
 button{cursor:pointer;background:var(--accent);color:#fff;border:none;}
-button:hover{opacity:.9;}
+button:hover{opacity:.95;}
 
-/* Cards */
-.cards {
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-  gap:15px;
+/* Group controls */
+.groupControls { margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+/* Groups */
+.group { margin-bottom:14px; }
+.groupHeader {
+  display:flex; align-items:center; justify-content:space-between;
+  background: rgba(255,255,255,0.02); padding:10px 12px; border-radius:8px;
+  border:1px solid rgba(255,255,255,0.03); font-weight:700;
 }
+.groupHeaderInner { display:flex; gap:12px; align-items:center }
+.groupHeader .meta { color:#bbb; font-weight:600; font-size:0.95rem }
+.groupContent { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px; margin-top:10px; }
+.group.collapsed .groupContent { display:none }
+.toggleBtn { background:transparent; border:none; color:#ccc; font-weight:700; cursor:pointer; transform-origin:center; transition:transform .18s ease; }
+.group.collapsed .toggleBtn { transform: rotate(-90deg); }
+
+/* Cards — improved visual hierarchy */
 .card {
   background:var(--card); border:1px solid var(--border);
-  border-radius:10px; box-shadow:0 2px 10px var(--shadow);
-  padding:12px 15px; display:flex; flex-direction:column; justify-content:space-between;
+  border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.45);
+  padding:14px; display:flex; flex-direction:column; justify-content:space-between;
+  transition: transform .12s ease, box-shadow .12s ease;
 }
-.card.open {border-left:6px solid var(--open);}
-.card.opgelost {border-left:6px solid var(--solved);opacity:.85;}
-.card h3{margin:0;font-size:1.1rem;}
-.card small{color:#aaa;}
-.status{font-weight:bold;color:var(--accent);}
-.solveBtn {background:var(--solved);margin-top:8px;}
+.card:hover { transform: translateY(-4px); box-shadow:0 18px 40px rgba(0,0,0,0.55); }
+.card.open {border-left:6px solid var(--open);} 
+.card.opgelost {border-left:6px solid var(--solved);opacity:.92;}
+.card h3{margin:0;font-size:1.2rem; letter-spacing:0.2px}
+.card .problem { margin-top:8px; font-size:1.03rem; color:var(--fg); line-height:1.25 }
+.card .meta { margin-top:10px; color:#9aa0a6; font-size:0.85rem }
+.card .status{font-weight:700;color:var(--accent); margin-top:8px}
+.solveBtn {background:var(--solved);margin-top:8px;padding:8px;border-radius:8px;display:inline-flex;align-items:center;gap:8px}
 .solveBtn:disabled{background:#444;cursor:not-allowed;}
-</style>
+.solveBtn .spinner{ width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,0.25); border-top-color:rgba(255,255,255,0.9); animation:spin .8s linear infinite; }
+@keyframes spin{to{transform:rotate(360deg)}}
+.solveBtn.saving{ opacity:.9; transform:scale(.995); }
+.solveBtn.success{ background: linear-gradient(90deg,#2ecc71,#27ae60); box-shadow:0 8px 24px rgba(39,174,96,0.18); }
 
-<!-- PIN overlay CSS -->
-<style>
-/* Donkere modal (Optie B) — met aangepaste knoppen en leesbaarheid */
-#pinOverlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.94);
-  z-index: 99999;
-  -webkit-tap-highlight-color: transparent;
-  /* fallback hard override to reduce chance of being hidden by other CSS:
-     this ensures the overlay is visible unless explicitly removed. */
-}
+/* Drag handle */
+.dragHandle { cursor:grab; font-size:12px; color:#ccc; background:transparent; border:none }
+.card.dragging { opacity:0.5 }
+
+/* Toast */
+.toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:12px 16px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.6); z-index:200000 }
+
+/* PIN overlay CSS */
+#pinOverlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.94); z-index: 99999; }
 #pinOverlay[hidden] { display:none !important; }
-
-#pinCard {
-  background: #0b0c0d;
-  color: #f8fafc;
-  border-radius: 12px;
-  padding: 22px;
-  width: 380px;
-  max-width: 94%;
-  box-shadow: 0 22px 60px rgba(0,0,0,0.75);
-  text-align: center;
-  border: 1px solid rgba(255,255,255,0.04);
-  font-family: inherit;
-}
-
+#pinCard { background: #0b0c0d; color: #f8fafc; border-radius: 12px; padding: 22px; width: 380px; max-width: 94%; box-shadow: 0 22px 60px rgba(0,0,0,0.75); text-align: center; border: 1px solid rgba(255,255,255,0.04); font-family: inherit; }
 #pinTitle { margin: 0 0 10px; font-size: 18px; font-weight: 600; color: #ffffff; }
-
-/* PIN display */
-#pinDisplay {
-  height:56px;
-  border-radius:10px;
-  border: 1px solid rgba(255,255,255,0.06);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin: 0 auto 14px;
-  font-size:28px;
-  letter-spacing:14px;
-  background: rgba(255,255,255,0.02);
-  user-select:none;
-  color: #fff;
-  width: 86%;
-  max-width: 320px;
-  box-sizing: border-box;
-}
-
-/* Numpad grid */
+#pinDisplay { height:56px; border-radius:10px; border: 1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; margin: 0 auto 14px; font-size:28px; letter-spacing:14px; background: rgba(255,255,255,0.02); user-select:none; color: #fff; width: 86%; max-width: 320px; box-sizing: border-box; }
 .pinKeypad { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-top:6px; }
-
-/* Keys — GROTER en DIK gedrukt */
-.pinKey {
-  padding:14px;
-  border-radius:10px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.04);
-  cursor:pointer;
-  user-select:none;
-  font-size:20px;          /* groter */
-  font-weight:700;         /* dikker */
-  color: #ffffff;
-  min-height:60px;         /* grotere hit-area */
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition: transform .06s ease, background .12s ease, box-shadow .06s ease;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.25) inset;
-}
+.pinKey { padding:14px; border-radius:10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04); cursor:pointer; user-select:none; font-size:20px; font-weight:700; color: #ffffff; min-height:60px; display:flex; align-items:center; justify-content:center; transition: transform .06s ease, background .12s ease, box-shadow .06s ease; box-shadow: 0 1px 0 rgba(0,0,0,0.25) inset; }
 .pinKey:active { transform: translateY(1px); filter:brightness(0.98); }
 .pinKey:focus { outline:none; box-shadow: 0 0 0 3px rgba(255,255,255,0.08), 0 6px 20px rgba(0,0,0,0.6); }
-
-/* Ontgrendel knop: gewenste kleur en extra vet */
-.pinKey.wide {
-  grid-column: 1 / -1;
-  background: #e10a8c;     /* EXACTe kleur zoals gevraagd */
-  color: #fff;
-  font-weight:800;
-  font-size:18px;
-  border: 1px solid rgba(0,0,0,0.35);
-  min-height:62px;
-  box-shadow: 0 6px 18px rgba(225,10,140,0.14);
-}
-.pinKey.wide:hover { filter: brightness(1.03); }
-
-/* Error tekst */
+.pinKey.wide { grid-column: 1 / -1; background: #e10a8c; color: #fff; font-weight:800; font-size:18px; border: 1px solid rgba(0,0,0,0.35); min-height:62px; box-shadow: 0 6px 18px rgba(225,10,140,0.14); }
 #pinError { color: #ffb3b3; min-height:22px; margin-top:12px; font-size:13px; line-height:1; }
-
 #pinCard .small-note { margin-top:10px; font-size:12px; color: rgba(255,255,255,0.68); }
-
-/* Responsive */
-@media (max-width:420px){
-  #pinCard { width: 92%; padding:16px; }
-  #pinDisplay { font-size:22px; height:50px; letter-spacing:10px; max-width:280px; }
-  .pinKey { font-size:19px; padding:12px; min-height:52px; }
-  .pinKey.wide { min-height:54px; font-size:17px; }
-}
+@media (max-width:420px){ #pinCard { width: 92%; padding:16px; } #pinDisplay { font-size:22px; height:50px; letter-spacing:10px; max-width:280px; } .pinKey { font-size:19px; padding:12px; min-height:52px; } .pinKey.wide { min-height:54px; font-size:17px; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>🏎️ Kart Problemen Dashboard V1.1</h1>
+  <h1>🏎️ Kart Problemen Dashboard V1.2</h1>
   <button id="modeToggle">☀️</button>
 </header>
 
@@ -231,81 +170,93 @@ button:hover{opacity:.9;}
         <option value="">Alle</option><option value="open">Open</option><option value="opgelost">Opgelost</option>
       </select>
     </label>
-    <button id="clearFilters">❌ Wissen</button>
+
+    <div class="groupControls">
+      <label>Groeperen op:
+        <select id="groupBy">
+          <option value="none">Geen</option>
+          <option value="date">Datum</option>
+          <option value="status">Status</option>
+        </select>
+      </label>
+      <button id="clearFilters">❌ Wissen</button>
+    </div>
   </div>
 
-  <div class="cards" id="cards"></div>
+  <div id="cardsContainer"></div>
 </main>
 
+<!-- simple toast placeholder -->
+<div id="toastRoot" aria-live="polite" style="position:fixed;right:18px;bottom:18px;z-index:200000"></div>
+
 <script>
+/*
+  VOOR JE START:
+  - Vervang SHEET_URL door de URL van je gedeployde Google Apps Script webapp (exec-url).
+  - De server (Apps Script) moet de GET returning { rows: [...], orders: {...} } ondersteunen
+    en de POST actons 'add', 'solve' en 'reorder' (voorbeeld in mijn eerdere reactie).
+*/
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbyV2YCK6qVc60A-ktS33beE5T7wupJXadiyn_hHPtsXIrP5tq5aIIjHCacLq_LE8yryig/exec";
 
+// fill kart selects
 for(let i=1;i<=40;i++){
   document.querySelector("#kart").innerHTML+=`<option>${i}</option>`;
   document.querySelector("#filterKart").innerHTML+=`<option>${i}</option>`;
 }
 
-let all=[];
-const syncStatus=document.getElementById("syncStatus");
+let all = [];
+let serverOrders = {}; // wordt gevuld door load()
+const syncStatus = document.getElementById("syncStatus");
 
-/* -----------------------
-   Date formatting util
-   -----------------------
-   Accepts ISO strings like 2025-11-05T23:00:00.000Z and returns:
-   "DD-MM-YYYY HH:MM" in Europe/Amsterdam timezone.
-   If input is not parseable, returns the original string.
-*/
+/* small UX helpers */
+function showToast(msg, timeout=2500){
+  const root=document.getElementById('toastRoot');
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg; root.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.addEventListener('transitionend',()=>t.remove()); }, timeout);
+}
+
+/* date formatting */
 function formatIsoToDDMMYYYY_HHMM(iso) {
   if (!iso) return '';
-  // quick guard: if it's already a short NL date (e.g. "06-11-2025" or "06/11/2025")
-  // just return it (optionally add time if you'd like)
-  // Try to parse to a Date — if invalid, return original
   const date = new Date(iso);
   if (isNaN(date.getTime())) return iso;
-
   const opts = {
     timeZone: 'Europe/Amsterdam',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false
   };
-  // use en-GB so day-month order is natural, then pick parts
   const parts = new Intl.DateTimeFormat('en-GB', opts).formatToParts(date);
   const map = {};
   parts.forEach(p => { if (p.type !== 'literal') map[p.type] = p.value; });
-
-  // fallback if some part missing
   if (!map.day || !map.month || !map.year) return iso;
   return `${map.day}-${map.month}-${map.year} ${map.hour}:${map.minute}`;
 }
+function extractDateKey(iso) {
+  const pretty = formatIsoToDDMMYYYY_HHMM(iso);
+  const m = pretty.match(/^(\d{2}-\d{2}-\d{4})/);
+  return m ? m[1] : pretty;
+}
 
-/* -----------------------
-   Data load + render
-   ----------------------- */
-async function load(){
-  syncStatus.textContent="🔄 Data verversen...";
+/* Local ordering storage — keyed by groupKey */
+function storageKeyForGroup(groupKey){ return 'kart-order:' + (groupKey||'__all__'); }
+function saveOrderForGroup(groupKey, ids){ localStorage.setItem(storageKeyForGroup(groupKey), JSON.stringify(ids)); }
+function loadOrderForGroup(groupKey){ try{ return JSON.parse(localStorage.getItem(storageKeyForGroup(groupKey))||'[]'); }catch(e){return [];} }
+
+/* Sync order to server (POST JSON) */
+async function syncOrderToServer(groupKey, ids){
   try{
-    const r=await fetch(SHEET_URL+"?t="+Date.now());
-    const d=await r.json();
-    // map rows from sheet — assume r[0] contains ISO timestamp
-    all=d.slice(1).map(r=>({
-      datum: r[0],
-      kart: r[1],
-      probleem: r[2],
-      melder: r[3],
-      status: r[4]||"open"
-    }));
-    renderDashboard(); renderCards();
-    syncStatus.textContent="✅ Gesynchroniseerd ("+new Date().toLocaleTimeString("nl-NL")+")";
+    const body = { action: 'reorder', groupKey, order: ids };
+    const r = await fetch(SHEET_URL, { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+    if(!r.ok) throw new Error('Server gaf fout: ' + r.status);
+    showToast('Volgorde opgeslagen');
   }catch(err){
-    console.error(err);
-    syncStatus.textContent="⚠️ Kon niet verbinden (offline?)";
+    console.warn('Kon volgorde niet syncen',err);
+    showToast('Kon volgorde niet opslaan (offline)');
   }
 }
 
+/* -----------------------
+   Render + grouping
+   ----------------------- */
 function renderDashboard(){
   const total=all.length;
   const openKarts=new Set(all.filter(p=>p.status==="open").map(p=>p.kart)).size;
@@ -317,70 +268,262 @@ function renderDashboard(){
 function renderCards(){
   const kartF=document.getElementById("filterKart").value;
   const statF=document.getElementById("filterStatus").value;
-  const c=document.getElementById("cards"); c.innerHTML="";
-  all.filter(p=>(!kartF||p.kart==kartF)&&(!statF||p.status==statF))
-     .reverse()
-     .forEach(p=>{
-        const div=document.createElement("div");
-        div.className=`card ${p.status}`;
-        // format the date for display; if p.datum is not an ISO string it will be returned as-is
-        const prettyDate = formatIsoToDDMMYYYY_HHMM(p.datum);
-        div.innerHTML=`
-          <h3>Kart ${p.kart}</h3>
-          <p>${p.probleem}</p>
-          <small>${prettyDate} – ${p.melder}</small>
-          <p class="status">${p.status}</p>
-          <button class="solveBtn" ${p.status==="opgelost"?"disabled":""}
-            onclick="solve('${p.kart}','${p.probleem}')">✅ Markeer als opgelost</button>`;
-        c.appendChild(div);
-     });
+  const groupBy=document.getElementById('groupBy').value;
+  const container=document.getElementById('cardsContainer'); container.innerHTML='';
+
+  const filtered = all.filter(p=>(!kartF||p.kart==kartF)&&(!statF||p.status==statF)).slice().reverse();
+
+  if(groupBy==='none'){
+    const wrapper = document.createElement('div'); wrapper.className='group';
+    const content = document.createElement('div'); content.className='groupContent';
+    wrapper.appendChild(content);
+    container.appendChild(wrapper);
+    appendCardsToContainer(filtered, content, '__nogroup__');
+  } else {
+    const groups = {};
+    filtered.forEach(p=>{
+      let key = groupBy==='date' ? extractDateKey(p.datum) : (p.status || 'onbekend');
+      if(!groups[key]) groups[key]=[];
+      groups[key].push(p);
+    });
+    // sort groups by date desc or by status name
+    const keys = Object.keys(groups).sort((a,b)=>{
+      if(groupBy==='date'){
+        const pa=a.split('-').reverse().join('-');
+        const pb=b.split('-').reverse().join('-');
+        return pb.localeCompare(pa);
+      }
+      return a.localeCompare(b);
+    });
+
+    keys.forEach(key=>{
+      const wrapper = document.createElement('div'); wrapper.className='group';
+      const header = document.createElement('div'); header.className='groupHeader';
+      header.innerHTML = `<div class="groupHeaderInner"><div class="title">${key}</div><div class="meta">${groups[key].length} items</div></div><div><button class="toggleBtn" aria-label="Inklappen">▾</button></div>`;
+      wrapper.appendChild(header);
+      const content = document.createElement('div'); content.className='groupContent';
+      wrapper.appendChild(content);
+      container.appendChild(wrapper);
+      appendCardsToContainer(groups[key], content, key);
+
+      // if stored collapsed state in localStorage, apply it
+      const collapsed = localStorage.getItem('kart-collapsed:' + key);
+      if(collapsed === '1') wrapper.classList.add('collapsed');
+
+      // toggle handler
+      const tb = header.querySelector('.toggleBtn');
+      tb.addEventListener('click', ()=>{
+        wrapper.classList.toggle('collapsed');
+        const is = wrapper.classList.contains('collapsed');
+        localStorage.setItem('kart-collapsed:' + key, is ? '1' : '0');
+      });
+    });
+  }
+  enableDragAndDrop();
+}
+
+function makeCardElement(p){
+  const id = (p.kart + '|' + p.datum).replace(/\s+/g,'');
+  const div=document.createElement("div");
+  div.className=`card ${p.status}`;
+  div.setAttribute('draggable','true');
+  div.dataset.id = id;
+  div.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <h3>Kart ${p.kart}</h3>
+      <button class="dragHandle" aria-label="Versleep">☰</button>
+    </div>
+    <div class="problem">${p.probleem}</div>
+    <div class="meta">${formatIsoToDDMMYYYY_HHMM(p.datum)} – ${p.melder}</div>
+    <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+      <div class="status">${p.status}</div>
+      <button class="solveBtn" ${p.status==="opgelost"?"disabled":""} data-kart="${p.kart}" data-probleem="${p.probleem}">✅ Markeer als opgelost</button>
+    </div>
+  `;
+  return div;
+}
+
+/*
+  appendCardsToContainer:
+  - first checks localStorage order (per-group)
+  - else uses serverOrders[groupKey] (if present)
+  - otherwise keeps default order
+*/
+function appendCardsToContainer(items, contentEl, groupKey){
+  // Build elements
+  const elems = items.map(makeCardElement);
+  contentEl.innerHTML = '';
+  elems.forEach(e=>contentEl.appendChild(e));
+
+  // apply saved order (local first, else server)
+  const localSaved = loadOrderForGroup(groupKey);
+  let applyOrder = [];
+  if (localSaved && localSaved.length) {
+    applyOrder = localSaved;
+  } else if (serverOrders && serverOrders[groupKey] && serverOrders[groupKey].length) {
+    applyOrder = serverOrders[groupKey];
+  }
+
+  if (applyOrder && applyOrder.length){
+    const map = new Map();
+    contentEl.querySelectorAll('.card').forEach(c=>map.set(c.dataset.id,c));
+    applyOrder.forEach(id => { if(map.has(id)) contentEl.appendChild(map.get(id)); });
+    // append any not in saved (new items)
+    contentEl.querySelectorAll('.card').forEach(c => { if(!applyOrder.includes(c.dataset.id)) contentEl.appendChild(c); });
+  }
 }
 
 /* -----------------------
-   Form submit — use ISO timestamp for consistency
+   Drag & drop — updates localStorage order for the group container (and syncs to server)
    ----------------------- */
-document.getElementById("addForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  const body={
-    action:"add",
-    datum: new Date().toISOString(), // <-- store ISO so render formatting works
-    kart:document.getElementById("kart").value,
-    probleem:document.getElementById("probleem").value,
-    melder:document.getElementById("melder").value,
-    status:"open"
-  };
-  await fetch(SHEET_URL,{method:"POST",body:JSON.stringify(body)});
-  e.target.reset(); load();
-});
+function enableDragAndDrop(){
+  document.querySelectorAll('.groupContent').forEach(container=>{
+    let dragged = null;
+    container.addEventListener('dragstart', e=>{
+      const t = e.target.closest('.card');
+      if(!t) return;
+      dragged = t;
+      t.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try{ e.dataTransfer.setData('text/plain', t.dataset.id); }catch(e){}
+    });
+    container.addEventListener('dragend', e=>{ if(dragged){ dragged.classList.remove('dragging'); dragged=null; saveOrderForThisContainer(container); } });
 
-async function solve(kart,probleem){
-  await fetch(SHEET_URL,{method:"POST",body:JSON.stringify({action:"solve",kart,probleem})});
-  load();
+    container.addEventListener('dragover', e=>{
+      e.preventDefault();
+      const after = getDragAfterElement(container, e.clientY);
+      const dragging = container.querySelector('.dragging');
+      if(!dragging) return;
+      if(after == null) container.appendChild(dragging);
+      else container.insertBefore(dragging, after);
+    });
+
+    container.addEventListener('drop', e=>{
+      e.preventDefault(); saveOrderForThisContainer(container);
+    });
+  });
 }
 
-// Filters
+function getDragAfterElement(container, y){
+  const draggableElements = [...container.querySelectorAll('.card:not(.dragging)')];
+  return draggableElements.reduce((closest, child)=>{
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height/2;
+    if(offset < 0 && offset > closest.offset){
+      return { offset: offset, element: child };
+    } else return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element || null;
+}
+
+async function saveOrderForThisContainer(container){
+  const groupEl = container.closest('.group');
+  let key = '__nogroup__';
+  if(groupEl){
+    const header = groupEl.querySelector('.groupHeader');
+    if(header) key = header.querySelector('.title') ? header.querySelector('.title').textContent.trim() : key;
+  }
+  const ids = [...container.querySelectorAll('.card')].map(c=>c.dataset.id);
+  saveOrderForGroup(key, ids);
+  await syncOrderToServer(key, ids);
+}
+
+/* -----------------------
+   Data load + actions
+   - GET returns { rows: [...], orders: {...} }
+   ----------------------- */
+async function load(){
+  syncStatus.textContent="🔄 Data verversen...";
+  try{
+    const r = await fetch(SHEET_URL + "?t=" + Date.now());
+    const d = await r.json();
+    const rows = Array.isArray(d.rows) ? d.rows : (d.data || []);
+    serverOrders = d.orders || {};
+    all = rows.slice(1).map(r => ({
+      datum: r[0],
+      kart: r[1],
+      probleem: r[2],
+      melder: r[3],
+      status: r[4] || "open"
+    }));
+    renderDashboard();
+    renderCards();
+    syncStatus.textContent = "✅ Gesynchroniseerd (" + new Date().toLocaleTimeString("nl-NL") + ")";
+  }catch(err){
+    console.error(err);
+    syncStatus.textContent="⚠️ Kon niet verbinden (offline?)";
+    showToast('Offline: gebruik lokale data');
+  }
+}
+
+/* Form submit — POST JSON */
+document.getElementById("addForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const body={ action:"add", datum: new Date().toISOString(), kart:document.getElementById("kart").value, probleem:document.getElementById("probleem").value, melder:document.getElementById("melder").value, status:"open" };
+  try{
+    const resp = await fetch(SHEET_URL,{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!resp.ok) throw new Error('server error');
+    e.target.reset();
+    await load();
+    showToast('Melding toegevoegd');
+  }catch(err){
+    console.error(err);
+    showToast('Kon melding niet toevoegen (offline)');
+  }
+});
+
+/* Delegated solve click with visual feedback */
+document.addEventListener('click', async (ev)=>{
+  const btn = ev.target.closest('.solveBtn');
+  if(!btn) return;
+  // visual feedback: spinner + disabled
+  btn.disabled = true; btn.classList.add('saving');
+  const prevHTML = btn.innerHTML;
+  btn.innerHTML = `<span class="spinner"></span><span>Opslaan...</span>`;
+
+  const kart = btn.dataset.kart; const probleem = btn.dataset.probleem;
+  try{
+    const resp = await fetch(SHEET_URL,{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'solve', kart, probleem})});
+    if(!resp.ok) throw new Error('server error');
+
+    // success — update card UI
+    const card = btn.closest('.card');
+    if(card){
+      card.classList.remove('open'); card.classList.add('opgelost');
+      const statusEl = card.querySelector('.status'); if(statusEl) statusEl.textContent = 'opgelost';
+      btn.classList.remove('saving'); btn.classList.add('success');
+      btn.innerHTML = '✅ Opgelost';
+      btn.disabled = true;
+    }
+    showToast('Melding gemarkeerd als opgelost');
+    renderDashboard();
+  }catch(err){
+    console.error(err);
+    btn.classList.remove('saving');
+    btn.disabled = false; btn.innerHTML = prevHTML;
+    showToast('Kon melding niet markeren (offline)');
+  }
+});
+
+/* Filters */
 document.getElementById("filterKart").addEventListener("change",renderCards);
 document.getElementById("filterStatus").addEventListener("change",renderCards);
+document.getElementById("groupBy").addEventListener("change",renderCards);
 document.getElementById("clearFilters").addEventListener("click",()=>{document.getElementById("filterKart").value="";document.getElementById("filterStatus").value="";renderCards();});
 
-// Auto refresh every 60s
+/* Auto refresh every 60s */
 setInterval(load,60000);
 
-// Dark/light mode
+/* Dark/light mode */
 const body=document.body, toggle=document.getElementById("modeToggle");
 toggle.addEventListener("click",()=>{body.classList.toggle("light");toggle.textContent=body.classList.contains("light")?"🌙":"☀️";});
 
-// Register service worker
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js?v=20251106-1')
-    .then(()=>console.log("Service Worker ready"))
-    .catch(console.error);
-}
+/* Service worker reg (kept) */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('service-worker.js?v=20251106-1').then(()=>console.log("Service Worker ready")).catch(console.error); }
 
 load();
 </script>
 
-<!-- PIN overlay HTML (staat na de hoofdscript zodat het DOM beschikbaar is) -->
+<!-- PIN overlay -->
 <div id="pinOverlay" aria-hidden="false">
   <div id="pinCard" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
     <h3 id="pinTitle">Voer pincode in</h3>
@@ -405,115 +548,20 @@ load();
   </div>
 </div>
 
-<!-- PIN script -->
 <script>
-/* Eenvoudige client-side pincode overlay.
-   Houd er rekening mee dat dit alleen client-side is (plaintext in code). */
-const CORRECT_PIN = '3120'; // pas aan indien gewenst
-
+/* PIN script (unchanged) */
+const CORRECT_PIN = '3120';
 const overlay = document.getElementById('pinOverlay');
 const pinDisplay = document.getElementById('pinDisplay');
 const pinError = document.getElementById('pinError');
 const keypad = document.getElementById('pinKeypad');
 let entered = '';
-
-// Render de maskering (•) van ingevoerde cijfers
-function renderPin() {
-  const masked = entered.split('').map(()=> '•').join('');
-  pinDisplay.textContent = (masked + '----').slice(0,4);
-  pinError.textContent = '';
-}
-
-// Controleer en ontgrendel
-function unlock() {
-  if (entered.length !== 4) {
-    pinError.textContent = 'Voer 4 cijfers in';
-    return;
-  }
-  if (entered === CORRECT_PIN) {
-    overlay.style.display = 'none';
-    overlay.setAttribute('aria-hidden','true');
-    document.body.style.overflow = ''; // restore scrolling
-    document.body.focus();
-  } else {
-    pinError.textContent = 'Onjuiste pincode';
-    setTimeout(()=> { entered=''; renderPin(); }, 600);
-  }
-}
-
-// Probeer automatisch wanneer 4 cijfers zijn ingevoerd
-function tryAutoUnlockWhenFull() {
-  if (entered.length === 4) {
-    // korte delay zodat het laatste cijfer zichtbaar is
-    setTimeout(unlock, 150);
-  }
-}
-
-// Klik- en knopafhandeling
-keypad.addEventListener('click', (ev)=>{
-  const t = ev.target;
-  if (!t.classList.contains('pinKey')) return;
-  const v = t.textContent.trim();
-  if (v === '←') {
-    entered = entered.slice(0,-1);
-    renderPin();
-  } else if (v === 'Ontgrendel') {
-    unlock();
-  } else if (/^\d$/.test(v)) {
-    if (entered.length < 4) {
-      entered += v;
-      renderPin();
-      tryAutoUnlockWhenFull();
-    }
-  }
-});
-
-// Keyboard support (0-9, Backspace, Enter). Als overlay verborgen is, negeer toetsen.
-window.addEventListener('keydown', (e)=>{
-  if (overlay.style.display === 'none') return;
-  if (e.key >= '0' && e.key <= '9') {
-    if (entered.length < 4) {
-      entered += e.key;
-      renderPin();
-      tryAutoUnlockWhenFull();
-    }
-    e.preventDefault();
-  } else if (e.key === 'Backspace') {
-    entered = entered.slice(0,-1); renderPin(); e.preventDefault();
-  } else if (e.key === 'Enter') {
-    unlock(); e.preventDefault();
-  }
-});
-
-// Init
+function renderPin() { const masked = entered.split('').map(()=> '•').join(''); pinDisplay.textContent = (masked + '----').slice(0,4); pinError.textContent = ''; }
+function unlock() { if (entered.length !== 4) { pinError.textContent = 'Voer 4 cijfers in'; return; } if (entered === CORRECT_PIN) { overlay.style.display = 'none'; overlay.setAttribute('aria-hidden','true'); document.body.style.overflow = ''; document.body.focus(); } else { pinError.textContent = 'Onjuiste pincode'; setTimeout(()=> { entered=''; renderPin(); }, 600); } }
+function tryAutoUnlockWhenFull() { if (entered.length === 4) { setTimeout(unlock, 150); } }
+keypad.addEventListener('click', (ev)=>{ const t = ev.target; if (!t.classList.contains('pinKey')) return; const v = t.textContent.trim(); if (v === '←') { entered = entered.slice(0,-1); renderPin(); } else if (v === 'Ontgrendel') { unlock(); } else if (/^\d$/.test(v)) { if (entered.length < 4) { entered += v; renderPin(); tryAutoUnlockWhenFull(); } } });
+window.addEventListener('keydown', (e)=>{ if (overlay.style.display === 'none') return; if (e.key >= '0' && e.key <= '9') { if (entered.length < 4) { entered += e.key; renderPin(); tryAutoUnlockWhenFull(); } e.preventDefault(); } else if (e.key === 'Backspace') { entered = entered.slice(0,-1); renderPin(); e.preventDefault(); } else if (e.key === 'Enter') { unlock(); e.preventDefault(); } });
 renderPin();
-</script>
-
-<!-- PIN debug: force show (temporary) -->
-<script>
-(function(){
-  window.addEventListener('load', () => {
-    console.log('[PIN debug] page loaded — checking overlay presence');
-    const o = document.getElementById('pinOverlay');
-    if (!o) {
-      console.error('[PIN debug] #pinOverlay not found — deployed index.html might differ');
-      return;
-    }
-    console.log('[PIN debug] overlay found — forcing visible and above all (temporary)');
-    // Force strong styles so overlay cannot be hidden by other CSS
-    o.style.setProperty('display','flex','important');
-    o.style.setProperty('position','fixed','important');
-    o.style.setProperty('inset','0','important');
-    o.style.setProperty('z-index','2147483647','important');
-    o.setAttribute('aria-hidden','false');
-    // Prevent scrolling while overlay active
-    document.body.style.overflow = 'hidden';
-    // log computed style
-    const cs = getComputedStyle(o);
-    console.log('[PIN debug] computed display:', cs.display, 'z-index:', cs.zIndex);
-    try{ console.log('[PIN debug] CORRECT_PIN =', typeof CORRECT_PIN !== 'undefined' ? CORRECT_PIN : 'not found'); }catch(e){}
-  });
-})();
 </script>
 
 </body>
