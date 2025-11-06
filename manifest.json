@@ -1,15 +1,21 @@
 {
-  "name": "Kart Dashboard",
+  "name": "GameCity Kart Dashboard",
   "short_name": "Karts",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#0f1115",
+  "background_color": "#000000",
   "theme_color": "#00c896",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1048/1048313.png",
+      "src": "Sodikart.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "GamecityBackground.png",
+      "sizes": "1024x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
