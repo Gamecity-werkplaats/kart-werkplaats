@@ -88,6 +88,61 @@ button:hover{opacity:.9;}
 .status{font-weight:bold;color:var(--accent);}
 .solveBtn {background:var(--solved);margin-top:8px;}
 .solveBtn:disabled{background:#444;cursor:not-allowed;}
+<style>
+  /* PIN overlay (zelfstandig, raakt jouw layout niet) */
+  #pinOverlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.55);
+    z-index: 99999; /* heel hoog zodat het boven alles zit */
+  }
+  #pinCard {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 360px;
+    max-width: 92%;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.4);
+    text-align: center;
+  }
+  #pinTitle { margin:0 0 8px; font-size:18px; }
+  #pinDisplay {
+    height:48px;
+    border-radius:8px;
+    border:1px solid #eee;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:12px;
+    font-size:26px;
+    letter-spacing:10px;
+    background:#fbfbfb;
+    user-select:none;
+  }
+  .pinKeypad {
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:8px;
+  }
+  .pinKey {
+    padding:12px;
+    border-radius:8px;
+    background:#f3f3f3;
+    border:1px solid #e6e6e6;
+    cursor:pointer;
+    user-select:none;
+    font-size:16px;
+  }
+  .pinKey:active { transform: translateY(1px); }
+  .pinKey.wide { grid-column: 1 / -1; background:#111; color:#fff; font-weight:600; }
+  #pinError { color:crimson; min-height:20px; margin-top:10px; font-size:13px; }
+  @media (max-width:420px){
+    #pinCard{ width:320px; padding:16px; }
+    #pinDisplay{ font-size:22px; height:44px; letter-spacing:8px; }
+  }
 </style>
 </head>
 <body>
@@ -218,7 +273,99 @@ if('serviceWorker' in navigator){
 }
 
 load();
-</script>
+<!-- PIN overlay (plak dit vlak voor </body>) -->
+<div id="pinOverlay" aria-hidden="false">
+  <div id="pinCard" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+    <h3 id="pinTitle">Voer pincode in</h3>
+    <div id="pinDisplay">----</div>
+
+    <div class="pinKeypad" id="pinKeypad">
+      <div class="pinKey">1</div>
+      <div class="pinKey">2</div>
+      <div class="pinKey">3</div>
+      <div class="pinKey">4</div>
+      <div class="pinKey">5</div>
+      <div class="pinKey">6</div>
+      <div class="pinKey">7</div>
+      <div class="pinKey">8</div>
+      <div class="pinKey">9</div>
+      <div class="pinKey">←</div>
+      <div class="pinKey">0</div>
+      <div class="pinKey wide" id="pinEnter">Ontgrendel</div>
+    </div>
+
+    <div id="pinError" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Simpele pincode overlay (client-side) ---
+  // Pas hier de pincode aan:
+  const CORRECT_PIN = '3120';
+
+  const overlay = document.getElementById('pinOverlay');
+  const pinDisplay = document.getElementById('pinDisplay');
+  const pinError = document.getElementById('pinError');
+  const keypad = document.getElementById('pinKeypad');
+  let entered = '';
+
+  function renderPin() {
+    const masked = entered.split('').map(()=> '•').join('');
+    pinDisplay.textContent = (masked + '----').slice(0,4);
+    pinError.textContent = '';
+  }
+
+  function unlock() {
+    if (entered.length !== 4) {
+      pinError.textContent = 'Voer 4 cijfers in';
+      return;
+    }
+    if (entered === CORRECT_PIN) {
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden','true');
+      // optioneel: focus terug naar je app
+      document.body.focus();
+    } else {
+      pinError.textContent = 'Onjuiste pincode';
+      setTimeout(()=> { entered=''; renderPin(); }, 600);
+    }
+  }
+
+  keypad.addEventListener('click', (ev)=>{
+    const t = ev.target;
+    if (!t.classList.contains('pinKey')) return;
+    const v = t.textContent.trim();
+    if (v === '←') {
+      entered = entered.slice(0,-1);
+      renderPin();
+    } else if (v === 'Ontgrendel') {
+      unlock();
+    } else if (/^\d$/.test(v)) {
+      if (entered.length < 4) {
+        entered += v;
+        renderPin();
+      }
+    }
+  });
+
+  // keyboard support
+  window.addEventListener('keydown', (e)=>{
+    if (overlay.style.display === 'none') return;
+    if (e.key >= '0' && e.key <= '9') {
+      if (entered.length < 4) { entered += e.key; renderPin(); }
+      e.preventDefault();
+    } else if (e.key === 'Backspace') {
+      entered = entered.slice(0,-1); renderPin(); e.preventDefault();
+    } else if (e.key === 'Enter') {
+      unlock(); e.preventDefault();
+    }
+  });
+
+  // init
+  renderPin();
+</script> 
 </body>
 </html>
+
 
