@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kart Problemen Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00c896">
 <style>
 :root {
   --bg:#0f1115; --fg:#f0f0f0; --accent:#00c896;
@@ -17,7 +19,8 @@ body.light {
 }
 body {
   background:var(--bg); color:var(--fg);
-  font-family:"Segoe UI",sans-serif; margin:0; transition:background .3s,color .3s;
+  font-family:"Segoe UI",sans-serif; margin:0;
+  transition:background .3s,color .3s;
 }
 
 /* Header */
@@ -28,11 +31,16 @@ header {
 }
 h1 {font-size:1.4rem;}
 #modeToggle {
-  background:var(--accent); border:none; border-radius:50%; width:38px; height:38px;
-  color:#fff; font-size:18px; cursor:pointer;
+  background:var(--accent); border:none; border-radius:50%;
+  width:38px; height:38px; color:#fff; font-size:18px; cursor:pointer;
 }
 
-/* Main layout */
+/* Sync indicator */
+#syncStatus {
+  font-size:0.85rem; color:#aaa; text-align:center; margin-top:8px;
+}
+
+/* Layout */
 main {max-width:1100px; margin:auto; padding:20px;}
 
 /* Stats */
@@ -49,7 +57,7 @@ main {max-width:1100px; margin:auto; padding:20px;}
 .stat h2 {margin:0; font-size:2rem;}
 .stat p {margin:5px 0 0; color:#aaa;}
 
-/* Form */
+/* Forms */
 form,.filters {
   background:var(--card); border:1px solid var(--border);
   border-radius:10px; padding:15px; margin-bottom:20px;
@@ -78,9 +86,7 @@ button:hover{opacity:.9;}
 .card h3{margin:0;font-size:1.1rem;}
 .card small{color:#aaa;}
 .status{font-weight:bold;color:var(--accent);}
-.solveBtn {
-  background:var(--solved);margin-top:8px;
-}
+.solveBtn {background:var(--solved);margin-top:8px;}
 .solveBtn:disabled{background:#444;cursor:not-allowed;}
 </style>
 </head>
@@ -91,14 +97,14 @@ button:hover{opacity:.9;}
 </header>
 
 <main>
-  <!-- Dashboard -->
+  <div id="syncStatus">🔄 Verbinden met Google Sheets...</div>
+
   <div class="stats">
     <div class="stat"><h2 id="totalProblems">0</h2><p>Totaal meldingen</p></div>
     <div class="stat"><h2 id="openProblems">0</h2><p>Karts met problemen</p></div>
     <div class="stat"><h2 id="workingKarts">0</h2><p>Werkende karts</p></div>
   </div>
 
-  <!-- Nieuwe melding -->
   <form id="addForm">
     <select id="kart" required><option value="">Kart...</option></select>
     <input id="probleem" placeholder="Probleem" required>
@@ -106,44 +112,45 @@ button:hover{opacity:.9;}
     <button type="submit">➕ Toevoegen</button>
   </form>
 
-  <!-- Filters -->
   <div class="filters">
     <label>Kart:
-      <select id="filterKart">
-        <option value="">Alle</option>
-      </select>
+      <select id="filterKart"><option value="">Alle</option></select>
     </label>
     <label>Status:
       <select id="filterStatus">
-        <option value="">Alle</option>
-        <option value="open">Open</option>
-        <option value="opgelost">Opgelost</option>
+        <option value="">Alle</option><option value="open">Open</option><option value="opgelost">Opgelost</option>
       </select>
     </label>
     <button id="clearFilters">❌ Wissen</button>
   </div>
 
-  <!-- Cards -->
   <div class="cards" id="cards"></div>
 </main>
 
 <script>
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbyV2YCK6qVc60A-ktS33beE5T7wupJXadiyn_hHPtsXIrP5tq5aIIjHCacLq_LE8yryig/exec";
+
 for(let i=1;i<=40;i++){
   document.querySelector("#kart").innerHTML+=`<option>${i}</option>`;
   document.querySelector("#filterKart").innerHTML+=`<option>${i}</option>`;
 }
-let all=[];
 
-// Ophalen data
+let all=[];
+const syncStatus=document.getElementById("syncStatus");
+
 async function load(){
-  const r=await fetch(SHEET_URL);
-  const d=await r.json();
-  all=d.slice(1).map(r=>({datum:r[0],kart:r[1],probleem:r[2],melder:r[3],status:r[4]||"open"}));
-  renderDashboard(); renderCards();
+  syncStatus.textContent="🔄 Data verversen...";
+  try{
+    const r=await fetch(SHEET_URL+"?t="+Date.now()); // avoid caching
+    const d=await r.json();
+    all=d.slice(1).map(r=>({datum:r[0],kart:r[1],probleem:r[2],melder:r[3],status:r[4]||"open"}));
+    renderDashboard(); renderCards();
+    syncStatus.textContent="✅ Gesynchroniseerd ("+new Date().toLocaleTimeString("nl-NL")+")";
+  }catch(err){
+    syncStatus.textContent="⚠️ Kon niet verbinden (offline?)";
+  }
 }
 
-// Dashboard cijfers
 function renderDashboard(){
   const total=all.length;
   const openKarts=new Set(all.filter(p=>p.status==="open").map(p=>p.kart)).size;
@@ -152,7 +159,6 @@ function renderDashboard(){
   document.getElementById("workingKarts").textContent=40-openKarts;
 }
 
-// Kaarten weergeven
 function renderCards(){
   const kartF=document.getElementById("filterKart").value;
   const statF=document.getElementById("filterStatus").value;
@@ -173,7 +179,6 @@ function renderCards(){
      });
 }
 
-// Nieuwe melding
 document.getElementById("addForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const body={action:"add",datum:new Date().toLocaleDateString("nl-NL"),
@@ -185,7 +190,6 @@ document.getElementById("addForm").addEventListener("submit",async e=>{
   e.target.reset(); load();
 });
 
-// Markeer als opgelost
 async function solve(kart,probleem){
   await fetch(SHEET_URL,{method:"POST",body:JSON.stringify({action:"solve",kart,probleem})});
   load();
@@ -196,9 +200,19 @@ document.getElementById("filterKart").addEventListener("change",renderCards);
 document.getElementById("filterStatus").addEventListener("change",renderCards);
 document.getElementById("clearFilters").addEventListener("click",()=>{document.getElementById("filterKart").value="";document.getElementById("filterStatus").value="";renderCards();});
 
+// Auto refresh every 60s
+setInterval(load,60000);
+
 // Dark/light mode
 const body=document.body, toggle=document.getElementById("modeToggle");
 toggle.addEventListener("click",()=>{body.classList.toggle("light");toggle.textContent=body.classList.contains("light")?"🌙":"☀️";});
+
+// Register service worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js')
+    .then(()=>console.log("Service Worker ready"))
+    .catch(console.error);
+}
 
 load();
 </script>
