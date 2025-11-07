@@ -25,6 +25,7 @@
       <div class="stat"><h2 id="workingKarts">0</h2><p>Werkende karts</p></div>
     </div>
 
+    <!-- Add form -->
     <form id="addForm">
       <select id="kart" required><option value="">Kart...</option></select>
       <input id="probleem" placeholder="Probleem" required>
@@ -32,30 +33,31 @@
       <button id="addBtn" type="submit">➕ Toevoegen</button>
     </form>
 
-    <!-- Filters toolbar -->
+    <!-- Custom filter toolbar -->
     <div class="filters">
-      <div class="filter-chip">
-        <label for="filterKart">🏎️ Kart:</label>
-        <select id="filterKart"><option value="">Alle</option></select>
-      </div>
-      <div class="filter-chip">
-        <label for="filterStatus">📋 Status:</label>
-        <select id="filterStatus">
-          <option value="">Alle</option>
-          <option value="open">Open</option>
-          <option value="resolved">Opgelost</option>
-        </select>
-      </div>
+      <details class="filter-dropdown" id="kartFilter">
+        <summary>🏎️ Kart: <span class="filter-label">Alle</span></summary>
+        <div class="filter-options" id="kartOptions"></div>
+      </details>
+
+      <details class="filter-dropdown" id="statusFilter">
+        <summary>📋 Status: <span class="filter-label">Alle</span></summary>
+        <div class="filter-options" id="statusOptions">
+          <div data-value="">Alle</div>
+          <div data-value="open">Open</div>
+          <div data-value="resolved">Opgelost</div>
+        </div>
+      </details>
+
       <button id="clearFilters" class="clear-filters">❌ Wissen</button>
     </div>
 
     <div id="cardsContainer"></div>
   </main>
 
-  <!-- === Scripts === -->
   <script src="js/app.js?v=20251107"></script>
 
-  <!-- === PIN Overlay === -->
+  <!-- 🔐 PIN Overlay -->
   <div id="pinOverlay" aria-hidden="false">
     <div id="pinCard" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
       <h3 id="pinTitle">Voer pincode in</h3>
@@ -71,9 +73,9 @@
     </div>
   </div>
 
-  <!-- === PIN Script === -->
   <script>
-  const CORRECT_PIN = "3120"; // 🔒 set your code
+  // === PIN Screen ===
+  const CORRECT_PIN = "3120"; // change to your code
   const overlay = document.getElementById("pinOverlay");
   const display = document.getElementById("pinDisplay");
   const error = document.getElementById("pinError");
