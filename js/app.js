@@ -9,6 +9,7 @@ for (let i = 1; i <= 40; i++) {
 let all = [];
 const syncStatus = document.getElementById("syncStatus");
 
+// Format ISO → DD-MM-YYYY HH:MM
 function formatIsoToDDMMYYYY_HHMM(iso) {
   if (!iso) return "";
   const date = new Date(iso);
@@ -45,6 +46,7 @@ async function loadData() {
 // Render cards
 function render(list) {
   const cont = document.getElementById("cardsContainer");
+  if (!cont) return; // safety
   cont.innerHTML = "";
 
   list.filter(r => r.status === "open").forEach(r => {
@@ -63,10 +65,11 @@ function render(list) {
       </div>`;
     cont.appendChild(c);
 
+    // Mark as resolved
     c.querySelector(".resolveBtn").onclick = async () => {
       const kart = r.kart;
 
-      // instant feedback
+      // 🟢 Instant feedback
       c.style.opacity = "0.5";
       c.style.transition = "opacity 0.3s";
       setTimeout(() => c.remove(), 300);
@@ -86,12 +89,12 @@ function render(list) {
   });
 }
 
-// Add new kart
+// Add new kart problem
 document.getElementById("addForm").onsubmit = async (e) => {
   e.preventDefault();
   const kart = document.getElementById("kart").value;
-  const problem = document.getElementById("problem").value;
-  const name = document.getElementById("name").value;
+  const problem = document.getElementById("probleem").value;
+  const name = document.getElementById("melder").value;
   if (!kart || !problem) return alert("Vul een kart en probleem in!");
 
   const addBtn = document.querySelector("#addBtn");
@@ -100,7 +103,7 @@ document.getElementById("addForm").onsubmit = async (e) => {
     addBtn.textContent = "✅ Toegevoegd!";
     setTimeout(() => {
       addBtn.disabled = false;
-      addBtn.textContent = "➕ Voeg toe";
+      addBtn.textContent = "➕ Toevoegen";
     }, 1500);
   }
 
@@ -115,8 +118,8 @@ document.getElementById("addForm").onsubmit = async (e) => {
   } catch (err) {
     console.error(err);
   } finally {
-    document.getElementById("problem").value = "";
-    document.getElementById("name").value = "";
+    document.getElementById("probleem").value = "";
+    document.getElementById("melder").value = "";
     loadData();
   }
 };
