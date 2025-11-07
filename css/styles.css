@@ -292,6 +292,26 @@ body.light .card-top h3.kidKart {
   color: rgb(253, 100, 0);
 }
 
+.card-top h3.adultKart::after,
+.card-top h3.kidKart::after {
+  content: "";
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  margin-top: 3px;
+  width: 100%;
+  opacity: 0.2;
+}
+
+.card-top h3.adultKart::after {
+  background: rgb(0, 55, 179);
+}
+
+.card-top h3.kidKart::after {
+  background: rgb(253, 100, 0);
+}
+
+
 
 /* Resolved toggle */
 .resolved-toggle {
