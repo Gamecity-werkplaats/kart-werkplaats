@@ -219,3 +219,71 @@ body.light .card.resolved {
   .filters { justify-content:center; }
   .filter-chip, .clear-filters { flex:1 1 45%; justify-content:center; }
 }
+
+/* === PIN Overlay Styles (fade out) === */
+#pinOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.94);
+  z-index: 99999;
+  transition: opacity 0.3s ease;
+}
+#pinOverlay.fadeOut { opacity: 0; pointer-events: none; }
+
+#pinCard {
+  background: #0b0c0d;
+  color: #f8fafc;
+  border-radius: 12px;
+  padding: 22px;
+  width: 380px;
+  max-width: 94%;
+  box-shadow: 0 22px 60px rgba(0,0,0,0.75);
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.04);
+  font-family: inherit;
+}
+
+.pinKeypad {
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:10px;
+  margin-top:6px;
+}
+.pinKey {
+  padding:14px;
+  border-radius:10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.04);
+  cursor:pointer;
+  user-select:none;
+  font-size:20px;
+  font-weight:700;
+  color:#fff;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: transform .06s ease, background .12s ease, box-shadow .06s ease;
+}
+.pinKey:active { transform:translateY(1px); filter:brightness(0.98); }
+.pinKey.wide {
+  grid-column:1 / -1;
+  background:#e10a8c;
+  color:#fff;
+  font-weight:800;
+  font-size:18px;
+  border: 1px solid rgba(0,0,0,0.35);
+  min-height:62px;
+  box-shadow:0 6px 18px rgba(225,10,140,0.14);
+}
+#pinError {
+  color:#ffb3b3;
+  min-height:22px;
+  margin-top:12px;
+  font-size:13px;
+  line-height:1;
+}
+
