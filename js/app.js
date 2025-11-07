@@ -90,7 +90,15 @@ function createCard(r, isResolved = false) {
       <h3 class="${kartTypeClass}">Kart: ${r.kart}</h3>
       <div class="melder">${r.melder || "-"}</div>
     </div>
+
     <div class="card-body">${r.probleem || ""}</div>
+
+    ${
+      r.fotourl
+        ? `<img src="${r.fotourl}" alt="Schade foto" class="damage-photo">`
+        : ""
+    }
+
     <div class="card-bottom">
       <div class="time">${date}</div>
       ${
@@ -100,6 +108,7 @@ function createCard(r, isResolved = false) {
       }
     </div>
   `;
+
 
   const btn = c.querySelector(".solveBtn");
   if (btn) {
