@@ -1,11 +1,6 @@
 // === CONFIG ===
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbyV2YCK6qVc60A-ktS33beE5T7wupJXadiyn_hHPtsXIrP5tq5aIIjHCacLq_LE8yryig/exec";
 
-// Fill kart dropdown for Add Form
-for (let i = 1; i <= 43; i++) {
-  document.querySelector("#kart").innerHTML += `<option>${i}</option>`;
-}
-
 let all = [];
 let showResolved = false;
 const syncStatus = document.getElementById("syncStatus");
@@ -83,7 +78,7 @@ function createCard(r, isResolved = false) {
   const c = document.createElement("div");
   const kartNum = Number(r.kart);
 
-  // Determine kart type (for styling text)
+  // Determine kart type (for title text color)
   const isAdult = kartNum >= 1 && kartNum <= 30;
   const kartTypeClass = isAdult ? "adultKart" : "kidKart";
   c.className = `card ${isResolved ? "resolved" : "open"}`;
@@ -106,7 +101,6 @@ function createCard(r, isResolved = false) {
     </div>
   `;
 
-  // Solve button behavior
   const btn = c.querySelector(".solveBtn");
   if (btn) {
     btn.onclick = async () => {
@@ -131,15 +125,15 @@ function createCard(r, isResolved = false) {
   return c;
 }
 
-
 /* -----------------------
    Add New Problem
 ----------------------- */
 document.getElementById("addForm").onsubmit = async e => {
   e.preventDefault();
-  const kart = document.getElementById("kart").value;
+  const kart = document.getElementById("addKartDropdown").dataset.selected;
   const problem = document.getElementById("probleem").value;
   const name = document.getElementById("melder").value;
+
   if (!kart || !problem) return alert("Vul een kart en probleem in!");
 
   const addBtn = document.querySelector("#addBtn");
@@ -162,6 +156,7 @@ document.getElementById("addForm").onsubmit = async e => {
   } finally {
     document.getElementById("probleem").value = "";
     document.getElementById("melder").value = "";
+    document.querySelector("#addKartDropdown .filter-label").textContent = "Kies kart";
     loadData();
   }
 };
@@ -203,13 +198,11 @@ function updateStats(list) {
   const workingAdults = totalAdults - brokenAdults;
   const workingKids = totalKids - brokenKids;
 
-  // Update text
   brokenAdultsEl.textContent = brokenAdults;
   brokenKidsEl.textContent = brokenKids;
   workingAdultsEl.textContent = workingAdults;
   workingKidsEl.textContent = workingKids;
 
-  // Toggle color classes dynamically
   adultBrokenBox.classList.toggle("broken", brokenAdults > 0);
   adultBrokenBox.classList.toggle("working", brokenAdults === 0);
   kidBrokenBox.classList.toggle("broken", brokenKids > 0);
@@ -268,6 +261,29 @@ document.getElementById("clearFilters").addEventListener("click", () => {
   kartLabel.textContent = "Alle";
   statusLabel.textContent = "Alle";
   render(all);
+});
+
+/* -----------------------
+   Custom Dropdown for Add Form
+----------------------- */
+const addKartContainer = document.getElementById("addKartOptions");
+for (let i = 1; i <= 43; i++) {
+  const opt = document.createElement("div");
+  opt.textContent = `Kart ${i}`;
+  opt.dataset.value = i;
+  addKartContainer.appendChild(opt);
+}
+
+const addKartDropdown = document.getElementById("addKartDropdown");
+const addKartLabel = addKartDropdown.querySelector(".filter-label");
+
+document.querySelectorAll("#addKartOptions div").forEach(opt => {
+  opt.addEventListener("click", e => {
+    const value = e.target.dataset.value;
+    addKartLabel.textContent = e.target.textContent;
+    addKartDropdown.removeAttribute("open");
+    addKartDropdown.dataset.selected = value; // store selected kart
+  });
 });
 
 /* -----------------------
