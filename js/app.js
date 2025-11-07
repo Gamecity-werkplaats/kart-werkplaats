@@ -1,6 +1,8 @@
+// === CONFIG ===
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbyV2YCK6qVc60A-ktS33beE5T7wupJXadiyn_hHPtsXIrP5tq5aIIjHCacLq_LE8yryig/exec";
 
-for (let i = 1; i <= 43; i++) {
+// Fill kart dropdown for Add Form
+for (let i = 1; i <= 40; i++) {
   document.querySelector("#kart").innerHTML += `<option>${i}</option>`;
 }
 
@@ -8,6 +10,9 @@ let all = [];
 let showResolved = false;
 const syncStatus = document.getElementById("syncStatus");
 
+/* -----------------------
+   Format ISO to DD-MM-YYYY HH:MM
+----------------------- */
 function formatIsoToDDMMYYYY_HHMM(iso) {
   if (!iso) return "";
   const date = new Date(iso);
@@ -23,13 +28,18 @@ function formatIsoToDDMMYYYY_HHMM(iso) {
   }).replace(",", "");
 }
 
+/* -----------------------
+   Load Data from Google Sheet
+----------------------- */
 async function loadData() {
   try {
     syncStatus.textContent = "🔄 Data verversen...";
     const res = await fetch(SHEET_URL);
     const json = await res.json();
     all = json.data || [];
+
     render(all);
+    updateStats(all); // ✅ updates the stat boxes
     syncStatus.textContent = "✅ Gesynchroniseerd";
   } catch (err) {
     console.error(err);
@@ -37,6 +47,9 @@ async function loadData() {
   }
 }
 
+/* -----------------------
+   Render Cards
+----------------------- */
 function render(list) {
   const cont = document.getElementById("cardsContainer");
   if (!cont) return;
@@ -62,6 +75,9 @@ function render(list) {
   }
 }
 
+/* -----------------------
+   Create Individual Card
+----------------------- */
 function createCard(r, isResolved = false) {
   const c = document.createElement("div");
   c.className = `card ${isResolved ? "resolved" : "open"}`;
@@ -83,6 +99,7 @@ function createCard(r, isResolved = false) {
     </div>
   `;
 
+  // Solve button
   const btn = c.querySelector(".solveBtn");
   if (btn) {
     btn.onclick = async () => {
@@ -106,6 +123,9 @@ function createCard(r, isResolved = false) {
   return c;
 }
 
+/* -----------------------
+   Add New Problem
+----------------------- */
 document.getElementById("addForm").onsubmit = async e => {
   e.preventDefault();
   const kart = document.getElementById("kart").value;
@@ -137,16 +157,56 @@ document.getElementById("addForm").onsubmit = async e => {
   }
 };
 
+/* -----------------------
+   Update Stats (Adults vs Kids)
+----------------------- */
+function updateStats(list) {
+  const brokenAdultsEl = document.getElementById("brokenAdults");
+  const brokenKidsEl = document.getElementById("brokenKids");
+  const workingAdultsEl = document.getElementById("workingAdults");
+  const workingKidsEl = document.getElementById("workingKids");
+
+  if (!brokenAdultsEl) return;
+
+  const adultRange = { start: 1, end: 30 };
+  const kidRange = { start: 31, end: 43 };
+
+  const brokenAdults = list.filter(r =>
+    (r.status || "").toLowerCase() === "open" &&
+    Number(r.kart) >= adultRange.start &&
+    Number(r.kart) <= adultRange.end
+  ).length;
+
+  const brokenKids = list.filter(r =>
+    (r.status || "").toLowerCase() === "open" &&
+    Number(r.kart) >= kidRange.start &&
+    Number(r.kart) <= kidRange.end
+  ).length;
+
+  const totalAdults = adultRange.end - adultRange.start + 1;
+  const totalKids = kidRange.end - kidRange.start + 1;
+
+  const workingAdults = totalAdults - brokenAdults;
+  const workingKids = totalKids - brokenKids;
+
+  brokenAdultsEl.textContent = brokenAdults;
+  brokenKidsEl.textContent = brokenKids;
+  workingAdultsEl.textContent = workingAdults;
+  workingKidsEl.textContent = workingKids;
+}
+
+/* -----------------------
+   Dark / Light Mode Toggle
+----------------------- */
 const toggle = document.getElementById("modeToggle");
 toggle.addEventListener("click", () => {
   document.body.classList.toggle("light");
   toggle.textContent = document.body.classList.contains("light") ? "🌙" : "☀️";
 });
 
-loadData();
-setInterval(loadData, 60000);
-
-/* --- Custom dropdowns --- */
+/* -----------------------
+   Custom Dropdown Filters
+----------------------- */
 const kartContainer = document.getElementById("kartOptions");
 for (let i = 1; i <= 40; i++) {
   const opt = document.createElement("div");
@@ -184,3 +244,9 @@ document.getElementById("clearFilters").addEventListener("click", () => {
   statusLabel.textContent = "Alle";
   render(all);
 });
+
+/* -----------------------
+   Initial Load + Auto Refresh
+----------------------- */
+loadData();
+setInterval(loadData, 60000);
