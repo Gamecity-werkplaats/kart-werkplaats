@@ -161,6 +161,39 @@ document.getElementById("addForm").onsubmit = async e => {
   }
 };
 
+async function uploadImage(file) {
+  if (!file) return "";
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(SHEET_URL, { method: "POST", body: formData });
+  const data = await res.json();
+  return data.url || "";
+}
+
+// Example inside your “add issue” handler:
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const file = document.getElementById("foto").files[0];
+  const fotoURL = await uploadImage(file);
+
+  const payload = {
+    kart: kart.value,
+    probleem: probleem.value,
+    status: "open",
+    tijd: new Date().toISOString(),
+    fotoURL: fotoURL
+  };
+
+  await fetch(SHEET_URL, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  load(); // reload cards
+});
+
+
 /* -----------------------
    Update Stats (Adults vs Kids)
 ----------------------- */
