@@ -44,12 +44,18 @@
 
 
     <!-- Add form -->
-    <form id="addForm">
-      <select id="kart" required><option value="">Kart...</option></select>
-      <input id="probleem" placeholder="Probleem" required>
-      <input id="melder" placeholder="Melder" required>
-      <button id="addBtn" type="submit">➕ Toevoegen</button>
-    </form>
+<form id="addForm">
+  <!-- Custom Kart Dropdown -->
+  <details class="filter-dropdown" id="addKartDropdown">
+    <summary>🏎️ Kart: <span class="filter-label">Kies kart</span></summary>
+    <div class="filter-options" id="addKartOptions"></div>
+  </details>
+
+  <input id="probleem" placeholder="Probleem" required>
+  <input id="melder" placeholder="Melder" required>
+  <button id="addBtn" type="submit">➕ Toevoegen</button>
+</form>
+
 
     <!-- Custom filter toolbar -->
     <div class="filters">
