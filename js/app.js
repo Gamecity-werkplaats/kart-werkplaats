@@ -80,7 +80,12 @@ function render(list) {
 ----------------------- */
 function createCard(r, isResolved = false) {
   const c = document.createElement("div");
-  c.className = `card ${isResolved ? "resolved" : "open"}`;
+  const kartNum = Number(r.kart);
+
+  // Determine kart type
+  const kartType = kartNum >= 1 && kartNum <= 30 ? "adultKart" : "kidKart";
+  c.className = `card ${kartType} ${isResolved ? "resolved" : "open"}`;
+
   const date = formatIsoToDDMMYYYY_HHMM(r.datum);
 
   c.innerHTML = `
@@ -98,6 +103,32 @@ function createCard(r, isResolved = false) {
       }
     </div>
   `;
+
+  // Solve button
+  const btn = c.querySelector(".solveBtn");
+  if (btn) {
+    btn.onclick = async () => {
+      btn.disabled = true;
+      btn.textContent = "⏳...";
+      c.classList.add("solving");
+      setTimeout(() => c.classList.remove("solving"), 700);
+
+      const form = new FormData();
+      form.append("action", "resolve");
+      form.append("kart", r.kart);
+      try {
+        await fetch(SHEET_URL, { method: "POST", body: form, mode: "no-cors" });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        loadData();
+      }
+    };
+  }
+
+  return c;
+}
+
 
   // Solve button
   const btn = c.querySelector(".solveBtn");
