@@ -235,6 +235,41 @@ body.light .card.resolved {
 .card.resolved h3 { color:var(--solved); }
 .card.resolved .card-body { color:#aaa; }
 
+/* === Adult vs Kid Kart Color Tints (Individual Cards) === */
+
+/* Volwassenkarts (1–30) */
+.card.adultKart {
+  background: rgba(0, 55, 179, 0.08); /* soft blue tint */
+}
+body.light .card.adultKart {
+  background: rgba(0, 55, 179, 0.07);
+}
+
+/* Kinderkarts (31–43) */
+.card.kidKart {
+  background: rgba(253, 100, 0, 0.08); /* soft orange tint */
+}
+body.light .card.kidKart {
+  background: rgba(253, 100, 0, 0.07);
+}
+
+/* Keep resolved cards less saturated but visible */
+.card.adultKart.resolved {
+  background: rgba(0, 55, 179, 0.04);
+}
+.card.kidKart.resolved {
+  background: rgba(253, 100, 0, 0.04);
+}
+
+/* Subtle hover glow for better feedback */
+.card.adultKart:hover {
+  box-shadow: 0 0 18px rgba(0, 55, 179, 0.2);
+}
+.card.kidKart:hover {
+  box-shadow: 0 0 18px rgba(253, 100, 0, 0.2);
+}
+
+
 /* Pulse animation on solving */
 @keyframes pulse {
   0% { box-shadow:0 0 0 0 rgba(0,200,150,0.4); }
