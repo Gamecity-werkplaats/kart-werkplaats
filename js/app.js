@@ -2,7 +2,7 @@
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbyV2YCK6qVc60A-ktS33beE5T7wupJXadiyn_hHPtsXIrP5tq5aIIjHCacLq_LE8yryig/exec";
 
 // Fill kart dropdown for Add Form
-for (let i = 1; i <= 42; i++) {
+for (let i = 1; i <= 43; i++) {
   document.querySelector("#kart").innerHTML += `<option>${i}</option>`;
 }
 
@@ -39,7 +39,7 @@ async function loadData() {
     all = json.data || [];
 
     render(all);
-    updateStats(all); // ✅ updates the stat boxes
+    updateStats(all);
     syncStatus.textContent = "✅ Gesynchroniseerd";
   } catch (err) {
     console.error(err);
@@ -71,6 +71,7 @@ function render(list) {
       render(list);
     };
     cont.appendChild(toggle);
+
     if (showResolved) resolved.forEach(r => cont.appendChild(createCard(r, true)));
   }
 }
@@ -128,7 +129,6 @@ function createCard(r, isResolved = false) {
 
   return c;
 }
-
 
 /* -----------------------
    Add New Problem
@@ -210,17 +210,13 @@ function updateStats(list) {
   // Toggle color classes dynamically
   adultBrokenBox.classList.toggle("broken", brokenAdults > 0);
   adultBrokenBox.classList.toggle("working", brokenAdults === 0);
-
   kidBrokenBox.classList.toggle("broken", brokenKids > 0);
   kidBrokenBox.classList.toggle("working", brokenKids === 0);
-
   adultWorkingBox.classList.toggle("working", workingAdults > 0);
   adultWorkingBox.classList.toggle("broken", workingAdults === 0);
-
   kidWorkingBox.classList.toggle("working", workingKids > 0);
   kidWorkingBox.classList.toggle("broken", workingKids === 0);
 }
-
 
 /* -----------------------
    Dark / Light Mode Toggle
@@ -235,7 +231,7 @@ toggle.addEventListener("click", () => {
    Custom Dropdown Filters
 ----------------------- */
 const kartContainer = document.getElementById("kartOptions");
-for (let i = 1; i <= 42; i++) {
+for (let i = 1; i <= 43; i++) {
   const opt = document.createElement("div");
   opt.textContent = `Kart ${i}`;
   opt.dataset.value = i;
