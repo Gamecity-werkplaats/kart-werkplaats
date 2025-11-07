@@ -78,98 +78,149 @@ button:hover{opacity:.95;}
 .groupHeader .meta { color:#bbb; font-weight:600; font-size:0.95rem }
 .groupContent { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px; margin-top:10px; }
 
-/* 🧩 Compact & modern card design */
-.card {
-  background: var(--card);
-  border-radius: 14px;
-  padding: 0.75rem 1rem;
-  box-shadow: 0 3px 10px var(--shadow);
-  margin: 0.6rem 0;
-  transition: all 0.2s ease;
+/* 🧩 Compact card layout + animations */
+#cardsContainer {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.8rem;
+  box-shadow: 0 3px 10px var(--shadow);
+  transition: all 0.2s ease;
+  opacity: 0;
+  animation: fadeIn 0.35s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 14px var(--shadow);
+  box-shadow: 0 5px 16px var(--shadow);
 }
-.card-header {
+
+/* Inner structure */
+.card-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--fg);
+}
+
+.kart-num {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1rem;
+  min-width: 70px;
+}
+
+.problem-text {
+  flex: 1;
+  margin-left: 8px;
+  font-size: 0.9rem;
+  color: var(--fg);
+  line-height: 1.2;
+}
+
+.card-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--fg);
-}
-.card-header .kart {
-  font-size: 1.05rem;
-  color: var(--accent);
-}
-.card-header .time {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #aaa;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
 }
-.card-body {
-  color: var(--fg);
-  font-size: 0.95rem;
-  line-height: 1.3;
-  padding-left: 0.25rem;
-  border-left: 3px solid var(--accent);
+
+.card-meta .melder {
+  color: #888;
+  flex: 1;
 }
-.card-body .probleem {
-  margin-bottom: 0.3rem;
+.card-meta .time {
+  color: #777;
+  font-size: 0.75rem;
+  margin-right: 0.4rem;
 }
-.card-body .melder {
-  font-size: 0.85rem;
-  color: #bbb;
+
+.card-meta button.resolveBtn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
-.card-footer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.5rem;
+.card-meta button.resolveBtn:hover {
+  filter: brightness(1.1);
+}
+
+/* ✅ Status label */
+.status-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--solved);
+  background: rgba(0, 200, 150, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+/* ⚙️ Resolved cards */
+.card.resolved {
+  opacity: 0.7;
+  background: #212326;
+}
+body.light .card.resolved {
+  background: #f3f3f3;
+}
+.card.resolved .problem-text { color: #aaa; }
+.card.resolved .kart-num { color: #999; }
+.card.resolved .status-label {
+  background: rgba(255, 255, 255, 0.08);
+  color: #888;
+}
+
+/* 🔽 Toggle for resolved section */
+.resolved-toggle {
+  align-self: center;
   margin-top: 0.4rem;
-}
-.card-footer button {
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 0.3rem 0.7rem;
-  font-weight: 600;
+  padding: 0.35rem 0.9rem;
   font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
-.card-footer button:hover {
+.resolved-toggle:hover {
   filter: brightness(1.1);
 }
-.status-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--solved);
-  background: rgba(0, 200, 150, 0.1);
-  padding: 0.25rem 0.6rem;
-  border-radius: 6px;
+.resolved-toggle:active {
+  transform: scale(0.97);
+}
+
+/* Smooth expand for resolved list */
+@keyframes expandFade {
+  from { opacity: 0; transform: scaleY(0.9); }
+  to { opacity: 1; transform: scaleY(1); }
 }
 .card.resolved {
-  background: #2a2d34;
-  opacity: 0.8;
-}
-body.light .card.resolved {
-  background: #f0f0f0;
-}
-.card.resolved .card-header .kart {
-  color: #999;
-}
-.card.resolved .card-body {
-  border-left-color: #777;
-  color: #aaa;
-}
-.card.resolved .status-label {
-  background: rgba(255, 255, 255, 0.08);
-  color: #888;
+  animation: expandFade 0.3s ease forwards;
 }
 
 /* 🌓 Dark/light adjustments */
@@ -182,7 +233,7 @@ body.dark .card.resolved {
   opacity: 0.75;
 }
 
-/* PIN overlay CSS (unchanged visual) */
+/* PIN overlay CSS (unchanged) */
 #pinOverlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.94); z-index: 99999; }
 #pinOverlay[hidden] { display:none !important; }
 #pinCard { background: #0b0c0d; color: #f8fafc; border-radius: 12px; padding: 22px; width: 380px; max-width: 94%; box-shadow: 0 22px 60px rgba(0,0,0,0.75); text-align: center; border: 1px solid rgba(255,255,255,0.04); font-family: inherit; }
