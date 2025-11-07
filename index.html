@@ -3,27 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kart Problemen Dashboard v1.3</title>
+  <title>Kart Problemen Dashboard</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="manifest" href="manifest.json?v=20251107">
-  <meta name="theme-color" content="#00c896">
   <link rel="stylesheet" href="css/styles.css?v=20251107">
+  <meta name="theme-color" content="#00c896">
 </head>
 <body>
   <header>
-    <h1>🏎️ Kart Problemen Dashboard V1.3.1</h1>
+    <h1>🏎️ Kart Problemen Dashboard</h1>
     <button id="modeToggle">☀️</button>
   </header>
 
   <main>
     <div id="syncStatus" class="sync-status">🏁 Bezig met laden…</div>
+
     <div class="stats">
       <div class="stat"><h2 id="totalProblems">0</h2><p>Totaal meldingen</p></div>
-      <div class="stat"><h2 id="openProblems">0</h2><p>Karts met problemen</p></div>
+      <div class="stat"><h2 id="openProblems">0</h2><p>Open meldingen</p></div>
       <div class="stat"><h2 id="workingKarts">0</h2><p>Werkende karts</p></div>
     </div>
+
     <form id="addForm">
       <select id="kart" required><option value="">Kart...</option></select>
       <input id="probleem" placeholder="Probleem" required>
@@ -31,32 +32,30 @@
       <button id="addBtn" type="submit">➕ Toevoegen</button>
     </form>
 
+    <!-- Filters toolbar -->
     <div class="filters">
-      <label>Kart:
+      <div class="filter-chip">
+        <label for="filterKart">🏎️ Kart:</label>
         <select id="filterKart"><option value="">Alle</option></select>
-      </label>
-      <label>Status:
+      </div>
+      <div class="filter-chip">
+        <label for="filterStatus">📋 Status:</label>
         <select id="filterStatus">
           <option value="">Alle</option>
           <option value="open">Open</option>
-          <option value="opgelost">Opgelost</option>
+          <option value="resolved">Opgelost</option>
         </select>
-      </label>
-      <div class="groupControls">
-        <label>Groeperen op:
-          <select id="groupBy">
-            <option value="none">Geen</option>
-            <option value="date">Datum</option>
-            <option value="status">Status</option>
-          </select>
-        </label>
-        <button id="clearFilters">❌ Wissen</button>
       </div>
+      <button id="clearFilters" class="clear-filters">❌ Wissen</button>
     </div>
+
     <div id="cardsContainer"></div>
   </main>
 
-  <!-- PIN Overlay -->
+  <!-- === Scripts === -->
+  <script src="js/app.js?v=20251107"></script>
+
+  <!-- === PIN Overlay === -->
   <div id="pinOverlay" aria-hidden="false">
     <div id="pinCard" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
       <h3 id="pinTitle">Voer pincode in</h3>
@@ -72,7 +71,61 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20251107"></script>
-  <script src="js/pin.js?v=20251107"></script>
+  <!-- === PIN Script === -->
+  <script>
+  const CORRECT_PIN = "3120"; // 🔒 set your code
+  const overlay = document.getElementById("pinOverlay");
+  const display = document.getElementById("pinDisplay");
+  const error = document.getElementById("pinError");
+  const keypad = document.getElementById("pinKeypad");
+  let entered = "";
+
+  function renderPin() {
+    display.textContent = (entered.replace(/\d/g, "•") + "----").slice(0,4);
+    error.textContent = "";
+  }
+
+  function unlock() {
+    if (entered === CORRECT_PIN) {
+      overlay.classList.add("fadeOut");
+      setTimeout(() => {
+        overlay.style.display = "none";
+        overlay.setAttribute("aria-hidden", "true");
+      }, 300);
+    } else {
+      error.textContent = "Onjuiste pincode";
+      entered = "";
+      renderPin();
+    }
+  }
+
+  function tryAutoUnlock() {
+    if (entered.length === 4) setTimeout(unlock, 150);
+  }
+
+  keypad.addEventListener("click", e => {
+    const key = e.target.textContent.trim();
+    if (!key) return;
+    if (key === "←") entered = entered.slice(0,-1);
+    else if (key === "Ontgrendel") unlock();
+    else if (/^\d$/.test(key) && entered.length < 4) {
+      entered += key;
+      tryAutoUnlock();
+    }
+    renderPin();
+  });
+
+  window.addEventListener("keydown", e => {
+    if (overlay.style.display === "none") return;
+    if (/^\d$/.test(e.key) && entered.length < 4) {
+      entered += e.key;
+      tryAutoUnlock();
+    } else if (e.key === "Backspace") entered = entered.slice(0,-1);
+    else if (e.key === "Enter") unlock();
+    renderPin();
+  });
+
+  renderPin();
+  </script>
 </body>
 </html>
